@@ -3,8 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>AI Pet Tag — MVP</title>
-  <!-- Tailwind (CDN) -->
+  <title>Qurioussa AI — Personalized 3D Design Studio</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <meta name="theme-color" content="#0b1220" />
 </head>
@@ -12,13 +11,13 @@
   <!-- Hero -->
   <header class="px-4 pt-10 pb-6">
     <div class="mx-auto max-w-6xl">
-      <div class="inline-flex items-center gap-3 rounded-2xl bg-gradient-to-r from-indigo-500/20 to-fuchsia-500/20 px-4 py-2 ring-1 ring-white/10">
-        <span class="text-2xl">🐾</span>
-        <span class="text-sm tracking-wide text-slate-300">AI-Customized Pet Tags</span>
+      <div class="inline-flex items-center gap-3 rounded-2xl bg-gradient-to-r from-cyan-400/20 to-fuchsia-500/20 px-4 py-2 ring-1 ring-white/10">
+        <span class="text-2xl">✨</span>
+        <span class="text-sm tracking-wide text-slate-300">Qurioussa AI Studio</span>
       </div>
-      <h1 class="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">Design a tag your pet would pick</h1>
-      <p class="mt-2 max-w-3xl text-slate-300">
-        Upload a name, choose a shape, and we’ll generate a printable 3D tag. MVP today — magic tomorrow.
+      <h1 class="mt-4 text-4xl font-semibold tracking-tight sm:text-5xl">Design. Generate. Manufacture.</h1>
+      <p class="mt-2 max-w-3xl text-slate-300 text-lg">
+        Welcome to <strong>Qurioussa AI</strong> — an intelligent co-creation platform that helps you design, visualize, and personalize products instantly using AI.
       </p>
     </div>
   </header>
@@ -26,21 +25,21 @@
   <!-- Main -->
   <main class="px-4 pb-16">
     <div class="mx-auto grid max-w-6xl gap-6 md:grid-cols-2">
-      <!-- Form card -->
+      <!-- Form -->
       <section class="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
-        <h2 class="text-lg font-medium mb-4">1) Enter details</h2>
+        <h2 class="text-lg font-medium mb-4">1) Describe your idea</h2>
 
         <form id="tag-form" class="space-y-4">
           <div>
-            <label class="block text-sm text-slate-300 mb-1">Pet name</label>
+            <label class="block text-sm text-slate-300 mb-1">Product name / label</label>
             <input name="name" placeholder="BELLA" required
-                   class="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-400"/>
+                   class="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-400"/>
           </div>
 
           <div>
-            <label class="block text-sm text-slate-300 mb-1">Shape</label>
+            <label class="block text-sm text-slate-300 mb-1">Base shape</label>
             <select name="shape"
-                    class="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                    class="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-cyan-400">
               <option value="circle">Circle</option>
               <option value="bone">Bone</option>
               <option value="heart">Heart</option>
@@ -48,15 +47,15 @@
           </div>
 
           <div>
-            <label class="block text-sm text-slate-300 mb-1">Pet photo (optional)</label>
+            <label class="block text-sm text-slate-300 mb-1">Reference image (optional)</label>
             <input type="file" name="photo" accept="image/*"
-                   class="w-full rounded-xl border border-white/10 bg-white/5 file:mr-3 file:rounded-lg file:border-0 file:bg-indigo-500 file:px-3 file:py-2 file:text-sm file:text-white hover:file:bg-indigo-600"/>
-            <p class="mt-1 text-xs text-slate-400">Photo support will power AI styling next.</p>
+                   class="w-full rounded-xl border border-white/10 bg-white/5 file:mr-3 file:rounded-lg file:border-0 file:bg-cyan-500 file:px-3 file:py-2 file:text-sm file:text-white hover:file:bg-cyan-600"/>
+            <p class="mt-1 text-xs text-slate-400">Future version: generate design style via AI vision model.</p>
           </div>
 
           <button type="submit"
-                  class="group inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-500 px-4 py-2 font-medium text-white shadow-lg shadow-indigo-500/20 hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-400">
-            <span>Generate 3D Tag</span>
+                  class="group inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-fuchsia-500 px-4 py-2 font-medium text-white shadow-lg hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-cyan-400">
+            <span>Generate Design</span>
             <svg class="h-4 w-4 transition -translate-x-0.5 group-hover:translate-x-0" viewBox="0 0 24 24" fill="none">
               <path d="M5 12h14M13 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
             </svg>
@@ -66,10 +65,10 @@
         </form>
       </section>
 
-      <!-- Viewer card -->
+      <!-- Viewer -->
       <section class="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
         <div class="flex items-center justify-between mb-3">
-          <h2 class="text-lg font-medium">2) Preview & download</h2>
+          <h2 class="text-lg font-medium">2) Preview & export</h2>
           <span id="status" class="text-xs text-slate-400">Idle</span>
         </div>
 
@@ -88,118 +87,65 @@
   <script src="https://unpkg.com/three@0.160.0/examples/js/loaders/STLLoader.js"></script>
 
   <script>
-    // ====== CONFIG ======
-    // CHANGE this to your Render API base:
+    // =========================
+    // QURIOUSSA AI CONFIG
+    // =========================
     const API_BASE = "https://pet-tag-backend-ed8a.onrender.com";
     const API_GENERATE_URL = API_BASE + "/generate";
     const API_DOWNLOAD = (p) => API_BASE + "/download?file=" + encodeURIComponent(p);
 
-    // ====== Helpers ======
-    const $ = (sel) => document.querySelector(sel);
+    const $ = (s) => document.querySelector(s);
     const statusEl = $('#status');
     const resultEl = $('#result');
     const toast = $('#toast');
 
-    function showStatus(text) { statusEl.textContent = text; }
-    function showToast(msg) {
-      toast.textContent = msg;
-      toast.classList.remove('hidden');
-      setTimeout(() => toast.classList.add('hidden'), 2500);
+    function showStatus(t){statusEl.textContent=t;}
+    function showToast(msg){toast.textContent=msg;toast.classList.remove('hidden');setTimeout(()=>toast.classList.add('hidden'),2500);}
+
+    // ---------- 3D VIEWER ----------
+    let scene,camera,renderer,controls,loader,mesh;
+    function initViewer(){
+      const container=$('#viewer'),w=container.clientWidth,h=container.clientHeight;
+      scene=new THREE.Scene();scene.background=new THREE.Color(0x0b1220);
+      camera=new THREE.PerspectiveCamera(50,w/h,0.1,1000);camera.position.set(0,50,120);
+      renderer=new THREE.WebGLRenderer({antialias:true});renderer.setSize(w,h);
+      container.innerHTML="";container.appendChild(renderer.domElement);
+      scene.add(new THREE.DirectionalLight(0xffffff,1));scene.add(new THREE.AmbientLight(0xffffff,0.35));
+      const grid=new THREE.GridHelper(200,20,0x334155,0x1f2937);grid.position.y=-20;scene.add(grid);
+      controls=new THREE.OrbitControls(camera,renderer.domElement);loader=new THREE.STLLoader();
+      function animate(){requestAnimationFrame(animate);renderer.render(scene,camera);}animate();
+      window.addEventListener('resize',()=>{const w2=container.clientWidth,h2=container.clientHeight;camera.aspect=w2/h2;camera.updateProjectionMatrix();renderer.setSize(w2,h2);});
     }
 
-    // ====== Three.js Viewer ======
-    let scene, camera, renderer, controls, loader, mesh;
-    function initViewer() {
-      const container = document.getElementById('viewer');
-      const w = container.clientWidth, h = container.clientHeight;
-
-      scene = new THREE.Scene();
-      scene.background = new THREE.Color(0x0b1220);
-
-      camera = new THREE.PerspectiveCamera(50, w/h, 0.1, 1000);
-      camera.position.set(0, 50, 120);
-
-      renderer = new THREE.WebGLRenderer({ antialias: true });
-      renderer.setSize(w, h);
-      container.innerHTML = "";
-      container.appendChild(renderer.domElement);
-
-      // Lights
-      scene.add(new THREE.DirectionalLight(0xffffff, 1.0));
-      scene.add(new THREE.AmbientLight(0xffffff, 0.35));
-
-      // Floor grid
-      const grid = new THREE.GridHelper(200, 20, 0x334155, 0x1f2937);
-      grid.position.y = -20;
-      scene.add(grid);
-
-      controls = new THREE.OrbitControls(camera, renderer.domElement);
-      loader = new THREE.STLLoader();
-
-      function animate(){ requestAnimationFrame(animate); renderer.render(scene, camera); }
-      animate();
-
-      // Resize
-      window.addEventListener('resize', () => {
-        const w2 = container.clientWidth, h2 = container.clientHeight;
-        camera.aspect = w2 / h2; camera.updateProjectionMatrix();
-        renderer.setSize(w2, h2);
-      });
+    function loadSTL(url){
+      loader.load(url,g=>{
+        if(mesh){scene.remove(mesh);mesh.geometry.dispose();}
+        const mat=new THREE.MeshPhongMaterial({flatShading:true});
+        mesh=new THREE.Mesh(g,mat);
+        g.computeBoundingBox();const bb=g.boundingBox;
+        const size=new THREE.Vector3().subVectors(bb.max,bb.min);
+        const center=new THREE.Vector3().addVectors(bb.min,bb.max).multiplyScalar(0.5);
+        g.translate(-center.x,-center.y,-center.z);scene.add(mesh);
+        const maxDim=Math.max(size.x,size.y,size.z);
+        camera.position.set(0,maxDim*1.6,maxDim*2.2);controls.update();
+      },undefined,e=>{showToast("Failed to load preview");console.error(e);});
     }
 
-    function loadSTL(url) {
-      if (!loader) return;
-      loader.load(url, (geometry) => {
-        if (mesh) { scene.remove(mesh); mesh.geometry.dispose(); }
-        const material = new THREE.MeshPhongMaterial({ flatShading: true });
-        mesh = new THREE.Mesh(geometry, material);
-
-        geometry.computeBoundingBox();
-        const bb = geometry.boundingBox;
-        const size = new THREE.Vector3().subVectors(bb.max, bb.min);
-        const center = new THREE.Vector3().addVectors(bb.min, bb.max).multiplyScalar(0.5);
-        geometry.translate(-center.x, -center.y, -center.z);
-        scene.add(mesh);
-
-        const maxDim = Math.max(size.x, size.y, size.z);
-        camera.position.set(0, maxDim * 1.6, maxDim * 2.2);
-        controls.update();
-      }, undefined, (err) => {
-        showToast("Failed to load preview");
-        console.error(err);
-      });
-    }
-
-    // ====== Form handling ======
-    document.getElementById('tag-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      showStatus('Generating…');
-      resultEl.textContent = '⏳ Generating STL...';
-
-      const data = new FormData(e.target);
-      try {
-        const res = await fetch(API_GENERATE_URL, { method: 'POST', body: data });
-        const json = await res.json();
-
-        if (json.stl_path) {
-          const url = API_DOWNLOAD(json.stl_path);
-          resultEl.innerHTML = `✅ STL ready — <a class="text-indigo-300 underline hover:text-indigo-200" href="${url}" target="_blank">Download</a>`;
-          loadSTL(url);
-          showStatus('Preview ready');
-        } else {
-          resultEl.textContent = '❌ Error: ' + JSON.stringify(json);
-          showToast('Generation failed');
-          showStatus('Error');
-        }
-      } catch (err) {
-        console.error(err);
-        resultEl.textContent = '❌ Could not reach backend.';
-        showToast('Backend not reachable');
-        showStatus('Error');
-      }
+    // ---------- FORM ----------
+    $('#tag-form').addEventListener('submit',async e=>{
+      e.preventDefault();showStatus('Generating…');resultEl.textContent='⏳ Generating model...';
+      const data=new FormData(e.target);
+      try{
+        const res=await fetch(API_GENERATE_URL,{method:'POST',body:data});
+        const json=await res.json();
+        if(json.stl_path){
+          const url=API_DOWNLOAD(json.stl_path);
+          resultEl.innerHTML=`✅ Model ready — <a class="text-cyan-300 underline hover:text-cyan-200" href="${url}" target="_blank">Download STL</a>`;
+          loadSTL(url);showStatus('Preview ready');
+        }else{resultEl.textContent='❌ Error: '+JSON.stringify(json);showToast('Generation failed');showStatus('Error');}
+      }catch(err){console.error(err);resultEl.textContent='❌ Could not reach backend.';showToast('Backend not reachable');showStatus('Error');}
     });
 
-    // boot
     initViewer();
   </script>
 </body>
