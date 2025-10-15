@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI Pet Tag — MVP</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <header class="header">
+    <h1>🐾 AI Pet Tag — MVP</h1>
+    <p class="sub">Upload your pet's photo + name → generate a personalized 3D tag.</p>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <h2>1) Enter details</h2>
+      <form id="tag-form">
+        <label>Pet name</label>
+        <input type="text" name="name" placeholder="BELLA" required />
+
+        <label>Shape</label>
+        <select name="shape">
+          <option value="circle">Circle</option>
+          <option value="bone">Bone</option>
+          <option value="heart">Heart</option>
+        </select>
+
+        <label>Pet photo (optional)</label>
+        <input type="file" name="photo" accept="image/*" />
+
+        <button type="submit">Generate 3D Tag</button>
+      </form>
+
+      <div id="result" class="result"></div>
+    </section>
+
+    <section class="card">
+      <h2>2) 3D Preview</h2>
+      <div id="viewer" class="viewer"></div>
+      <p class="hint">Tip: drag to rotate, scroll to zoom, right-click to pan.</p>
+    </section>
+  </main>
+
+  <!-- Three.js + STLLoader (for 3D preview) -->
+  <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+  <script src="https://unpkg.com/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://unpkg.com/three@0.160.0/examples/js/loaders/STLLoader.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
