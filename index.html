@@ -29,7 +29,7 @@
       <section class="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
         <h2 class="text-lg font-medium mb-4">1) Describe your idea</h2>
 
-        <form id="tag-form" class="space-y-4">
+        <form id="tag-form" class="space-y-4" novalidate>
           <div>
             <label class="block text-sm text-slate-300 mb-1">Product name / label</label>
             <input name="name" placeholder="BELLA" required
@@ -89,10 +89,12 @@
   <script>
     // =========================
     // QURIOUSSA AI CONFIG
+    // Expose to window so Console can read it.
     // =========================
-    const API_BASE = "https://pet-tag-backend-ed8a.onrender.com"; // <-- CHANGE THIS
-    const API_GENERATE_URL = API_BASE + "/generate";
-    const API_DOWNLOAD = (p) => API_BASE + "/download?file=" + encodeURIComponent(p);
+    window.QURIOUSSA_BUILD = "v4"; // bump this when you redeploy
+    window.API_BASE = "https://pet-tag-backend-ed8a.onrender.com"; // <--- CHANGE THIS
+    window.API_GENERATE_URL = window.API_BASE + "/generate";
+    window.API_DOWNLOAD = (p) => window.API_BASE + "/download?file=" + encodeURIComponent(p);
 
     const $ = (s) => document.querySelector(s);
     const statusEl = $('#status');
@@ -132,44 +134,56 @@
     }
 
     // ---------- FORM ----------
-    <script>
-document.getElementById('tag-form').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  showStatus('Generating…');
-  resultEl.textContent = '⏳ Generating model...';
+    document.getElementById('tag-form').addEventListener('submit', async (e) => {
+      e.preventDefault(); // DO NOT let the form navigate
+      showStatus('Generating…');
+      resultEl.textContent = '⏳ Generating model...';
 
-  const data = new FormData(e.target);
+      const data = new FormData(e.target);
 
-  // Don't send empty photo
-  const fileInput = e.target.querySelector('input[name="photo"]');
-  if (!fileInput || !fileInput.files || !fileInput.files[0]) {
-    data.delete('photo');
-  }
+      // Don't send empty photo
+      const fileInput = e.target.querySelector('input[name="photo"]');
+      if (!fileInput || !fileInput.files || !fileInput.files[0]) {
+        data.delete('photo');
+      }
 
-  try {
-    const res = await fetch(API_GENERATE_URL, { method: 'POST', body: data });
-    if (!res.ok) {
-      const text = await res.text();
-      throw new Error(`HTTP ${res.status}: ${text}`);
-    }
-    const json = await res.json();
-    if (json.stl_path) {
-      const url = API_DOWNLOAD(json.stl_path);
-      resultEl.innerHTML = `✅ Model ready — <a class="text-cyan-300 underline hover:text-cyan-200" href="${url}" target="_blank">Download STL</a>`;
-      loadSTL(url);
-      showStatus('Preview ready');
-    } else {
-      throw new Error('Unexpected response: ' + JSON.stringify(json));
-    }
-  } catch (err) {
-    console.error('Generate failed:', err.name, err.message);
-    resultEl.textContent = '❌ Could not reach backend: ' + err.message;
-    showToast('Backend error — see console');
-    showStatus('Error');
-  }
-});
-</script>
+      try {
+        const res = await fetch(window.API_GENERATE_URL, { method: 'POST', body: data });
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(`HTTP ${res.status}: ${text}`);
+        }
+        const json = await res.json();
+        if (json.stl_path) {
+          const url = window.API_DOWNLOAD(json.stl_path);
+          resultEl.innerHTML = `✅ Model ready — <a class="text-cyan-300 underline hover:text-cyan-200" href="${url}" target="_blank">Download STL</a>`;
+          loadSTL(url);
+          showStatus('Preview ready');
+        } else {
+          throw new Error('Unexpected response: ' + JSON.stringify(json));
+        }
+      } catch (err) {
+        console.error('Generate failed:', err);
+        resultEl.textContent = '❌ Could not reach backend: ' + err.message;
+        showToast('Backend error — see console');
+        showStatus('Error');
+      }
+    });
 
+    // Tiny health badge to prove this build is live
+    (async () => {
+      const badge = document.createElement('div');
+      badge.style.cssText = "position:fixed;bottom:8px;left:8px;background:#1f2937;color:#fff;padding:6px 10px;border-radius:8px;font:12px system-ui;z-index:9999";
+      badge.textContent = `Build ${window.QURIOUSSA_BUILD} — Pinging API…`;
+      document.body.appendChild(badge);
+      try {
+        const r = await fetch(window.API_BASE + "/health");
+        const t = await r.text();
+        badge.textContent = `Build ${window.QURIOUSSA_BUILD} — API ${r.ok ? "OK" : r.status} ${t}`;
+      } catch (e) {
+        badge.textContent = `Build ${window.QURIOUSSA_BUILD} — API unreachable`;
+      }
+    })();
 
     initViewer();
   </script>
