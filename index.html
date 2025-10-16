@@ -81,207 +81,163 @@
   <!-- Toast -->
   <div id="toast" class="pointer-events-none fixed bottom-4 left-1/2 z-50 hidden -translate-x-1/2 rounded-xl bg-red-500 px-4 py-2 text-sm text-white shadow-lg"></div>
 
+<script type="module">
+  // ======= IMPORTS (ES Modules) =======
+  import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js";
+  import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js";
+  import { STLLoader } from "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/STLLoader.js";
 
+  // ======= CONFIG =======
+  window.QURIOUSSA_BUILD = "v7";
+  const API_BASE = "https://pet-tag-backend-ed8a.onrender.com"; // <-- PUT YOUR RENDER URL
+  const API_GENERATE_URL = API_BASE + "/generate";
+  const API_DOWNLOAD = (p) => API_BASE + "/download?file=" + encodeURIComponent(p);
 
-<script>
-/* =========================
-   QURIOUSSA AI CONFIG
-   ========================= */
-window.QURIOUSSA_BUILD = "v6";
-window.API_BASE = "https://pet-tag-backend-ed8a.onrender.com";   // TODO: put your Render URL here
-window.API_GENERATE_URL = window.API_BASE + "/generate";
-window.API_DOWNLOAD = (p) => window.API_BASE + "/download?file=" + encodeURIComponent(p);
-
-/* Small helpers */
-const $ = (s) => document.querySelector(s);
-const statusEl = $('#status');
-const resultEl = $('#result');
-function showStatus(t){ if(statusEl) statusEl.textContent=t; }
-function showToast(msg){
-  let toast = document.getElementById('toast');
-  if (!toast) return;
-  toast.textContent = msg;
-  toast.classList.remove('hidden');
-  setTimeout(()=>toast.classList.add('hidden'), 2500);
-}
-
-/* =========================
-   Load Three.js in order (with CDN fallback)
-   ========================= */
-const CDN_PRIMARY  = "https://cdn.jsdelivr.net/npm/three@0.160.0";
-const CDN_FALLBACK = "https://unpkg.com/three@0.160.0";
-
-function loadScript(src) {
-  return new Promise((resolve, reject) => {
-    const s = document.createElement("script");
-    s.src = src; s.async = false; // keep order
-    s.onload = () => resolve();
-    s.onerror = () => reject(new Error("Failed: " + src));
-    document.head.appendChild(s);
-  });
-}
-
-async function ensureThreeLoaded() {
-  if (window.THREE && THREE.STLLoader && THREE.OrbitControls) return;
-
-  const paths = [
-    [`${CDN_PRIMARY}/build/three.min.js`, `${CDN_FALLBACK}/build/three.min.js`],
-    [`${CDN_PRIMARY}/examples/js/controls/OrbitControls.js`, `${CDN_FALLBACK}/examples/js/controls/OrbitControls.js`],
-    [`${CDN_PRIMARY}/examples/js/loaders/STLLoader.js`, `${CDN_FALLBACK}/examples/js/loaders/STLLoader.js`],
-  ];
-
-  for (const [primary, fallback] of paths) {
-    try { await loadScript(primary); }
-    catch { await loadScript(fallback); }
+  const $ = (s) => document.querySelector(s);
+  const statusEl = $('#status');
+  const resultEl = $('#result');
+  function showStatus(t){ if(statusEl) statusEl.textContent=t; }
+  function showToast(msg){
+    const toast = document.getElementById('toast');
+    if (!toast) return;
+    toast.textContent = msg;
+    toast.classList.remove('hidden');
+    setTimeout(()=>toast.classList.add('hidden'), 2500);
   }
 
-  if (!(window.THREE && THREE.STLLoader && THREE.OrbitControls)) {
-    throw new Error("Three.js components not available after load.");
-  }
-}
+  // ======= THREE.JS VIEWER =======
+  let scene, camera, renderer, controls, loader, mesh;
 
-const viewerReady = (async () => { await ensureThreeLoaded(); })();
+  function initViewer() {
+    const container = document.getElementById('viewer');
+    const w = container.clientWidth, h = container.clientHeight;
 
-/* =========================
-   Viewer + Loader
-   ========================= */
-let scene, camera, renderer, controls, loader, mesh;
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x0b1220);
 
-async function initViewer() {
-  await viewerReady;
+    camera = new THREE.PerspectiveCamera(50, w/h, 0.1, 5000);
+    camera.position.set(0, 80, 180);
 
-  const container = document.getElementById('viewer');
-  const w = container.clientWidth, h = container.clientHeight;
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(w, h);
+    container.innerHTML = "";
+    container.appendChild(renderer.domElement);
 
-  scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x0b1220);
+    scene.add(new THREE.DirectionalLight(0xffffff, 1));
+    scene.add(new THREE.AmbientLight(0xffffff, 0.35));
 
-  camera = new THREE.PerspectiveCamera(50, w/h, 0.1, 5000);
-  camera.position.set(0, 80, 180);
+    const grid = new THREE.GridHelper(400, 40, 0x334155, 0x1f2937);
+    grid.position.y = -20;
+    scene.add(grid);
+    scene.add(new THREE.AxesHelper(40));
 
-  renderer = new THREE.WebGLRenderer({ antialias: true });
-  renderer.setSize(w, h);
-  container.innerHTML = "";
-  container.appendChild(renderer.domElement);
+    controls = new OrbitControls(camera, renderer.domElement);
+    loader = new STLLoader();
 
-  scene.add(new THREE.DirectionalLight(0xffffff, 1));
-  scene.add(new THREE.AmbientLight(0xffffff, 0.35));
+    (function animate(){ requestAnimationFrame(animate); renderer.render(scene, camera); })();
 
-  const grid = new THREE.GridHelper(400, 40, 0x334155, 0x1f2937);
-  grid.position.y = -20;
-  scene.add(grid);
-  scene.add(new THREE.AxesHelper(40));
-
-  controls = new THREE.OrbitControls(camera, renderer.domElement);
-  loader = new THREE.STLLoader();
-
-  (function animate(){ requestAnimationFrame(animate); renderer.render(scene, camera); })();
-
-  window.addEventListener('resize', () => {
-    const w2 = container.clientWidth, h2 = container.clientHeight;
-    camera.aspect = w2/h2; camera.updateProjectionMatrix();
-    renderer.setSize(w2, h2);
-  });
-}
-
-async function loadSTL(url) {
-  await viewerReady;
-  if (!loader) loader = new THREE.STLLoader();
-  if (!loader) { showToast('3D viewer failed to initialize'); return; }
-
-  // quick reachability check
-  try {
-    const head = await fetch(url, { method: 'GET' });
-    if (!head.ok) { showToast('STL not accessible (' + head.status + ')'); return; }
-  } catch (e) {
-    showToast('Could not fetch STL URL'); return;
+    window.addEventListener('resize', () => {
+      const w2 = container.clientWidth, h2 = container.clientHeight;
+      camera.aspect = w2/h2; camera.updateProjectionMatrix();
+      renderer.setSize(w2, h2);
+    });
   }
 
-  loader.load(
-    url,
-    (geometry) => {
-      if (mesh) { scene.remove(mesh); mesh.geometry.dispose(); }
-      const material = new THREE.MeshPhongMaterial({ flatShading: true });
-      mesh = new THREE.Mesh(geometry, material);
-
-      geometry.computeBoundingBox();
-      const bb = geometry.boundingBox;
-      const center = new THREE.Vector3().addVectors(bb.min, bb.max).multiplyScalar(0.5);
-      geometry.translate(-center.x, -center.y, -center.z);
-      scene.add(mesh);
-
-      const size = new THREE.Vector3().subVectors(bb.max, bb.min);
-      const maxDim = Math.max(size.x, size.y, size.z) || 50;
-      const dist = maxDim * 2.2;
-      camera.position.set(0, maxDim * 0.8, dist);
-      camera.near = 0.1;
-      camera.far = Math.max(5000, dist * 10);
-      camera.updateProjectionMatrix();
-      controls.target.set(0, 0, 0);
-      controls.update();
-
-      console.log('STL loaded. bbox size:', size);
-    },
-    undefined,
-    (err) => { console.error('STL load error:', err); showToast('Failed to parse STL'); }
-  );
-}
-
-/* =========================
-   Form submit handler
-   ========================= */
-document.getElementById('tag-form').addEventListener('submit', async (e) => {
-  e.preventDefault();                 // prevent page reload
-  showStatus('Generating…');
-  resultEl.textContent = '⏳ Generating model...';
-
-  const data = new FormData(e.target);
-
-  // do NOT send empty photo
-  const fileInput = e.target.querySelector('input[name="photo"]');
-  if (!fileInput || !fileInput.files || !fileInput.files[0]) {
-    data.delete('photo');
-  }
-
-  try {
-    const res = await fetch(window.API_GENERATE_URL, { method: 'POST', body: data });
-    if (!res.ok) {
-      const text = await res.text();
-      throw new Error(`HTTP ${res.status}: ${text}`);
+  async function loadSTL(url) {
+    // reachability check (helps surface 404/CORS quickly)
+    try {
+      const head = await fetch(url, { method: 'GET' });
+      if (!head.ok) { showToast('STL not accessible (' + head.status + ')'); return; }
+    } catch (e) {
+      showToast('Could not fetch STL URL'); return;
     }
-    const json = await res.json();
-    if (json.stl_path) {
-      const url = window.API_DOWNLOAD(json.stl_path);
-      resultEl.innerHTML = `✅ Model ready — <a class="text-cyan-300 underline hover:text-cyan-200" href="${url}" target="_blank">Download STL</a>`;
-      await initViewer();   // ensure viewer is ready
-      loadSTL(url);
-      showStatus('Preview ready');
-    } else {
-      throw new Error('Unexpected response: ' + JSON.stringify(json));
-    }
-  } catch (err) {
-    console.error('Generate failed:', err);
-    resultEl.textContent = '❌ Could not reach backend: ' + err.message;
-    showToast('Backend error — see console');
-    showStatus('Error');
-  }
-});
 
-/* Health badge (helps you confirm live build + API) */
-(async () => {
-  const badge = document.createElement('div');
-  badge.style.cssText = "position:fixed;bottom:8px;left:8px;background:#1f2937;color:#fff;padding:6px 10px;border-radius:8px;font:12px system-ui;z-index:9999";
-  badge.textContent = `Build ${window.QURIOUSSA_BUILD} — Pinging API…`;
-  document.body.appendChild(badge);
-  try {
-    const r = await fetch(window.API_BASE + "/health");
-    const t = await r.text();
-    badge.textContent = `Build ${window.QURIOUSSA_BUILD} — API ${r.ok ? "OK" : r.status} ${t}`;
-  } catch (e) {
-    badge.textContent = `Build ${window.QURIOUSSA_BUILD} — API unreachable`;
+    loader.load(
+      url,
+      (geometry) => {
+        if (mesh) { scene.remove(mesh); mesh.geometry.dispose(); }
+
+        const material = new THREE.MeshPhongMaterial({ flatShading: true });
+        mesh = new THREE.Mesh(geometry, material);
+
+        geometry.computeBoundingBox();
+        const bb = geometry.boundingBox;
+        const center = new THREE.Vector3().addVectors(bb.min, bb.max).multiplyScalar(0.5);
+        geometry.translate(-center.x, -center.y, -center.z);
+        scene.add(mesh);
+
+        const size = new THREE.Vector3().subVectors(bb.max, bb.min);
+        const maxDim = Math.max(size.x, size.y, size.z) || 50;
+        const dist = maxDim * 2.2;
+        camera.position.set(0, maxDim * 0.8, dist);
+        camera.near = 0.1;
+        camera.far = Math.max(5000, dist * 10);
+        camera.updateProjectionMatrix();
+        controls.target.set(0, 0, 0);
+        controls.update();
+
+        console.log('STL loaded. bbox size:', size);
+      },
+      undefined,
+      (err) => {
+        console.error('STL load error:', err);
+        showToast('Failed to parse STL');
+      }
+    );
   }
-})();
+
+  // ======= FORM HANDLER =======
+  document.getElementById('tag-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    showStatus('Generating…');
+    resultEl.textContent = '⏳ Generating model...';
+
+    const data = new FormData(e.target);
+    // don’t send empty photo
+    const fileInput = e.target.querySelector('input[name="photo"]');
+    if (!fileInput || !fileInput.files || !fileInput.files[0]) data.delete('photo');
+
+    try {
+      const res = await fetch(API_GENERATE_URL, { method: 'POST', body: data });
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(`HTTP ${res.status}: ${text}`);
+      }
+      const json = await res.json();
+      if (json.stl_path) {
+        const url = API_DOWNLOAD(json.stl_path);
+        resultEl.innerHTML = `✅ Model ready — <a class="text-cyan-300 underline hover:text-cyan-200" href="${url}" target="_blank">Download STL</a>`;
+        // ensure viewer is initialized once
+        if (!renderer) initViewer();
+        loadSTL(url);
+        showStatus('Preview ready');
+      } else {
+        throw new Error('Unexpected response: ' + JSON.stringify(json));
+      }
+    } catch (err) {
+      console.error('Generate failed:', err);
+      resultEl.textContent = '❌ Could not reach backend: ' + err.message;
+      showToast('Backend error — see console');
+      showStatus('Error');
+    }
+  });
+
+  // Tiny health badge (helps verify live build + API)
+  (async () => {
+    const badge = document.createElement('div');
+    badge.style.cssText = "position:fixed;bottom:8px;left:8px;background:#1f2937;color:#fff;padding:6px 10px;border-radius:8px;font:12px system-ui;z-index:9999";
+    badge.textContent = `Build ${window.QURIOUSSA_BUILD} — Pinging API…`;
+    document.body.appendChild(badge);
+    try {
+      const r = await fetch(API_BASE + "/health");
+      const t = await r.text();
+      badge.textContent = `Build ${window.QURIOUSSA_BUILD} — API ${r.ok ? "OK" : r.status} ${t}`;
+    } catch (e) {
+      badge.textContent = `Build ${window.QURIOUSSA_BUILD} — API unreachable`;
+    }
+  })();
 </script>
+
 
 </body>
 </html>
