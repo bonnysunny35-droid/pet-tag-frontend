@@ -6,7 +6,18 @@
   <title>Qurioussa AI — Personalized 3D Design Studio</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <meta name="theme-color" content="#0b1220" />
+
+  <!-- ✅ Import map for Three.js modules -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+      "three/examples/jsm/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
 </head>
+
 <body class="h-full bg-slate-950 text-slate-100">
   <!-- Hero -->
   <header class="px-4 pt-10 pb-6">
@@ -29,7 +40,6 @@
       <section class="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
         <h2 class="text-lg font-medium mb-4">1) Describe your idea</h2>
 
-        <!-- IMPORTANT: action="#" + id matches JS -->
         <form id="tag-form" action="#" class="space-y-4" novalidate>
           <div>
             <label class="block text-sm text-slate-300 mb-1">Product name / label</label>
@@ -72,7 +82,6 @@
           <h2 class="text-lg font-medium">2) Preview & export</h2>
           <span id="status" class="text-xs text-slate-400">Idle</span>
         </div>
-
         <div id="viewer" class="h-[420px] w-full rounded-xl border border-white/10 bg-slate-900"></div>
         <p class="mt-2 text-xs text-slate-400">Drag to rotate · Scroll to zoom · Right-click to pan</p>
       </section>
@@ -82,36 +91,33 @@
   <!-- Toast -->
   <div id="toast" class="pointer-events-none fixed bottom-4 left-1/2 z-50 hidden -translate-x-1/2 rounded-xl bg-red-500 px-4 py-2 text-sm text-white shadow-lg"></div>
 
-  <!-- Single ES-module script -->
+  <!-- ✅ Working JS -->
   <script type="module">
-    /* ========= Imports ========= */
-    import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js";
-    import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js";
-    import { STLLoader } from "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/STLLoader.js";
+    import * as THREE from "three";
+    import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+    import { STLLoader } from "three/examples/jsm/loaders/STLLoader.js";
 
-    /* ========= Config ========= */
-    const API_BASE = "https://pet-tag-backend-ed8a.onrender.com"; // <- change if your URL differs
+    const API_BASE = "https://pet-tag-backend-ed8a.onrender.com";  // ← your Render backend URL
     const API_GENERATE_URL = API_BASE + "/generate";
     const API_DOWNLOAD = (p) => API_BASE + "/download?file=" + encodeURIComponent(p);
 
     const $ = (s) => document.querySelector(s);
-    const statusEl = $('#status');
-    const resultEl = $('#result');
-    const toastEl = $('#toast');
+    const statusEl = $("#status");
+    const resultEl = $("#result");
+    const toastEl  = $("#toast");
 
     function showStatus(t){ if(statusEl) statusEl.textContent = t; }
     function showToast(msg){
       if (!toastEl) return;
       toastEl.textContent = msg;
-      toastEl.classList.remove('hidden');
-      setTimeout(()=>toastEl.classList.add('hidden'), 2500);
+      toastEl.classList.remove("hidden");
+      setTimeout(()=>toastEl.classList.add("hidden"), 2500);
     }
 
-    /* ========= Viewer ========= */
     let scene, camera, renderer, controls, loader, mesh;
 
     function initViewer() {
-      const container = document.getElementById('viewer');
+      const container = document.getElementById("viewer");
       const w = container.clientWidth, h = container.clientHeight;
 
       scene = new THREE.Scene();
@@ -138,7 +144,7 @@
 
       (function animate(){ requestAnimationFrame(animate); renderer.render(scene, camera); })();
 
-      window.addEventListener('resize', () => {
+      window.addEventListener("resize", () => {
         const w2 = container.clientWidth, h2 = container.clientHeight;
         camera.aspect = w2/h2; camera.updateProjectionMatrix();
         renderer.setSize(w2, h2);
@@ -147,10 +153,10 @@
 
     async function loadSTL(url) {
       try {
-        const r = await fetch(url, { method: 'GET' });
+        const r = await fetch(url, { method: "GET" });
         if (!r.ok) throw new Error("HTTP " + r.status);
       } catch (e) {
-        resultEl.textContent = '❌ STL not accessible: ' + e.message;
+        resultEl.textContent = "❌ STL not accessible: " + e.message;
         return;
       }
 
@@ -172,43 +178,36 @@
           const dist = maxDim * 2.2;
           camera.position.set(0, maxDim * 0.8, dist);
           camera.near = 0.1;
-          camera.far = Math.max(5000, dist * 10);
+          camera.far  = Math.max(5000, dist * 10);
           camera.updateProjectionMatrix();
           controls.target.set(0, 0, 0);
           controls.update();
 
-          console.log('STL loaded. bbox size:', size);
+          console.log("STL loaded. bbox size:", size);
         },
         undefined,
         (err) => {
-          console.error('STL load error:', err);
-          resultEl.textContent = '❌ Failed to parse STL';
+          console.error("STL load error:", err);
+          resultEl.textContent = "❌ Failed to parse STL";
         }
       );
     }
 
-    /* ========= Attach handlers after DOM ready ========= */
-    document.addEventListener('DOMContentLoaded', () => {
-      // 1) Init viewer so it's ready
+    document.addEventListener("DOMContentLoaded", () => {
       initViewer();
 
-      // 2) Hook up form
-      const form = document.getElementById('tag-form');
-      form.addEventListener('submit', async (e) => {
-        e.preventDefault(); // no page reload
-        showStatus('Generating…');
-        resultEl.textContent = '⏳ Generating model...';
+      const form = document.getElementById("tag-form");
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        showStatus("Generating…");
+        resultEl.textContent = "⏳ Generating model...";
 
         const data = new FormData(form);
-
-        // Don't send empty photo
         const fileInput = form.querySelector('input[name="photo"]');
-        if (!fileInput || !fileInput.files || !fileInput.files[0]) {
-          data.delete('photo');
-        }
+        if (!fileInput || !fileInput.files || !fileInput.files[0]) data.delete("photo");
 
         try {
-          const res = await fetch(API_GENERATE_URL, { method: 'POST', body: data });
+          const res = await fetch(API_GENERATE_URL, { method: "POST", body: data });
           if (!res.ok) {
             const text = await res.text();
             throw new Error(`HTTP ${res.status}: ${text}`);
@@ -216,25 +215,26 @@
           const json = await res.json();
           if (json.stl_path) {
             const url = API_DOWNLOAD(json.stl_path);
-            resultEl.innerHTML = `✅ Model ready — <a class="text-cyan-300 underline hover:text-cyan-200" href="${url}" target="_blank">Download STL</a>`;
+            resultEl.innerHTML =
+              `✅ Model ready — <a class="text-cyan-300 underline hover:text-cyan-200" href="${url}" target="_blank">Download STL</a>`;
             loadSTL(url);
-            showStatus('Preview ready');
+            showStatus("Preview ready");
           } else {
-            throw new Error('Unexpected response: ' + JSON.stringify(json));
+            throw new Error("Unexpected response: " + JSON.stringify(json));
           }
         } catch (err) {
-          console.error('Generate failed:', err);
-          resultEl.textContent = '❌ Could not reach backend: ' + err.message;
-          showToast('Backend error — see console');
-          showStatus('Error');
+          console.error("Generate failed:", err);
+          resultEl.textContent = "❌ Could not reach backend: " + err.message;
+          showToast("Backend error — see console");
+          showStatus("Error");
         }
       });
     });
 
-    /* ========= Health badge ========= */
     (async () => {
-      const badge = document.createElement('div');
-      badge.style.cssText = "position:fixed;bottom:8px;left:8px;background:#1f2937;color:#fff;padding:6px 10px;border-radius:8px;font:12px system-ui;z-index:9999";
+      const badge = document.createElement("div");
+      badge.style.cssText =
+        "position:fixed;bottom:8px;left:8px;background:#1f2937;color:#fff;padding:6px 10px;border-radius:8px;font:12px system-ui;z-index:9999";
       badge.textContent = "Pinging API…";
       document.body.appendChild(badge);
       try {
