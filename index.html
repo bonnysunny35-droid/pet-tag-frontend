@@ -90,7 +90,7 @@
     // =========================
     // QURIOUSSA AI CONFIG
     // =========================
-    const API_BASE = "https://pet-tag-backend-ed8a.onrender.com";
+    const API_BASE = "https://pet-tag-backend-ed8a.onrender.com"; // <-- CHANGE THIS
     const API_GENERATE_URL = API_BASE + "/generate";
     const API_DOWNLOAD = (p) => API_BASE + "/download?file=" + encodeURIComponent(p);
 
@@ -132,18 +132,39 @@
     }
 
     // ---------- FORM ----------
-    $('#tag-form').addEventListener('submit',async e=>{
-      e.preventDefault();showStatus('Generating…');resultEl.textContent='⏳ Generating model...';
-      const data=new FormData(e.target);
-      try{
-        const res=await fetch(API_GENERATE_URL,{method:'POST',body:data});
-        const json=await res.json();
-        if(json.stl_path){
-          const url=API_DOWNLOAD(json.stl_path);
-          resultEl.innerHTML=`✅ Model ready — <a class="text-cyan-300 underline hover:text-cyan-200" href="${url}" target="_blank">Download STL</a>`;
-          loadSTL(url);showStatus('Preview ready');
-        }else{resultEl.textContent='❌ Error: '+JSON.stringify(json);showToast('Generation failed');showStatus('Error');}
-      }catch(err){console.error(err);resultEl.textContent='❌ Could not reach backend.';showToast('Backend not reachable');showStatus('Error');}
+    document.getElementById('tag-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      showStatus('Generating…');
+      resultEl.textContent = '⏳ Generating model...';
+
+      const data = new FormData(e.target);
+
+      // 🔑 Don't send empty photo field
+      const fileInput = e.target.querySelector('input[name="photo"]');
+      if (!fileInput || !fileInput.files || !fileInput.files[0]) {
+        data.delete('photo');
+      }
+
+      try {
+        const res = await fetch(API_GENERATE_URL, { method: 'POST', body: data });
+        const json = await res.json();
+
+        if (json.stl_path) {
+          const url = API_DOWNLOAD(json.stl_path);
+          resultEl.innerHTML = `✅ Model ready — <a class="text-cyan-300 underline hover:text-cyan-200" href="${url}" target="_blank">Download STL</a>`;
+          loadSTL(url);
+          showStatus('Preview ready');
+        } else {
+          resultEl.textContent = '❌ Error: ' + JSON.stringify(json);
+          showToast('Generation failed');
+          showStatus('Error');
+        }
+      } catch (err) {
+        console.error(err);
+        resultEl.textContent = '❌ Could not reach backend.';
+        showToast('Backend not reachable');
+        showStatus('Error');
+      }
     });
 
     initViewer();
